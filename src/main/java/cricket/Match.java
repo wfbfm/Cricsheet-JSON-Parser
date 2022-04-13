@@ -1,3 +1,5 @@
+package cricket;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -79,18 +81,18 @@ public class Match {
     public String printMatch() {
 
         StringBuilder str = new StringBuilder();
-        str.append("Match #" + String.valueOf(this.matchNumber) + ": ");
+        str.append("CricketJSON.Match #" + String.valueOf(this.matchNumber) + ": ");
         str.append(teamA + " vs. " + teamB + ", at " + venue);
         str.append(System.getProperty("line.separator"));
         if (this.matchOutcomeDetails.equals("Draw")) {
-            str.append("Match drawn");
+            str.append("CricketJSON.Match drawn");
         } else {
             str.append(this.matchWinner + " won by " + this.matchOutcomeDetails);
         }
         str.append(System.getProperty("line.separator"));
         str.append("--------------------------------------------------------");
         str.append(System.getProperty("line.separator"));
-        str.append("Match Replay: " + this.tossWinner + " won the toss and decided to " + this.tossDecision);
+        str.append("CricketJSON.Match Replay: " + this.tossWinner + " won the toss and decided to " + this.tossDecision);
         str.append(System.getProperty("line.separator"));
         str.append("--------------------------------------------------------");
 
@@ -98,9 +100,9 @@ public class Match {
             str.append(System.getProperty("line.separator"));
             str.append(innings.getTeam() + " ");
             if (innings.getFirstInningsFlag()) {
-                str.append("1st Innings: ");
+                str.append("1st CricketJSON.Innings: ");
             } else {
-                str.append("2nd Innings: ");
+                str.append("2nd CricketJSON.Innings: ");
             }
             str.append(innings.getInningsScore());
             str.append(System.getProperty("line.separator"));

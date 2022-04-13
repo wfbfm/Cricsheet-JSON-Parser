@@ -1,3 +1,5 @@
+package cricket;
+
 public class BatterScore {
     private final String player;
     private final int battingPosition;

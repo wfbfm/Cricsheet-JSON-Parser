@@ -1,3 +1,5 @@
+package cricket;
+
 public class BowlerScore {
 
     private final String player;
