@@ -1,16 +1,13 @@
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class LoadJSON {
     public static void main(String[] args) throws FileNotFoundException, ParseException {
-
         // Take filepath from user
         Scanner inputScan = new Scanner(System.in);
         System.out.println("Enter input filepath:");
@@ -29,10 +26,7 @@ public class LoadJSON {
         JSONParser jsonParser = new JSONParser();
         JSONObject data = (JSONObject) jsonParser.parse(fileContent);
 
-        Match cricketMatch = new Match(data);
-        cricketMatch.parseMatch();
+        Match cricketMatch = Match.parseFromJson(data);
         System.out.println(cricketMatch.printMatch());
-
-
     }
 }
