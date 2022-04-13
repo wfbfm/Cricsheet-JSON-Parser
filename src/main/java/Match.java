@@ -33,15 +33,14 @@ public class Match {
             matchWinner = outcomeObject.get("winner").toString();
             JSONObject outcomeDetailsObject = (JSONObject) outcomeObject.get("by");
             // desired format = "100 runs" / "8 wickets"
-            StringBuilder matchOutcomeStr = new StringBuilder();
+            ArrayList<String> allDetails = new ArrayList<>();
             for (int i = 0; i < outcomeDetailsObject.keySet().size(); i++) {
-                if (i > 0) {
-                    matchOutcomeStr.append(" and ");
-                }
-                matchOutcomeStr.append(outcomeDetailsObject.get(outcomeDetailsObject.keySet().toArray()[i].toString()) + " ");
-                matchOutcomeStr.append(outcomeDetailsObject.keySet().toArray()[i].toString());
+                String currentDetail = outcomeDetailsObject.get(outcomeDetailsObject.keySet().toArray()[i].toString()) +
+                        " " + outcomeDetailsObject.keySet().toArray()[i].toString();
+                allDetails.add(currentDetail);
             }
-            matchOutcomeDetails = matchOutcomeStr.toString();
+
+            matchOutcomeDetails = String.join(" and ", allDetails);
         }
 
         JSONObject tossObject = (JSONObject) matchInfo.get("toss");
@@ -52,8 +51,8 @@ public class Match {
         JSONArray allInnings = (JSONArray) matchData.get("innings");
         int teamACount = 0;
         int teamBCount = 0;
-        for (int i = 0; i < allInnings.size(); i++) {
-            JSONObject inningsObject = (JSONObject) allInnings.get(i);
+        for (Object allInning : allInnings) {
+            JSONObject inningsObject = (JSONObject) allInning;
             String team = inningsObject.get("team").toString();
 
             boolean firstInningsFlag = false;
@@ -66,10 +65,7 @@ public class Match {
             }
 
 
-            boolean declaredFlag = false;
-            if (inningsObject.get("declared") != null) {
-                declaredFlag = true;
-            }
+            boolean declaredFlag = inningsObject.get("declared") != null;
             Innings currentInnings = new Innings(inningsObject, team, declaredFlag, firstInningsFlag);
             currentInnings.parseInnings();
             currentInnings.generateBatterStats();
@@ -98,20 +94,20 @@ public class Match {
         str.append(System.getProperty("line.separator"));
         str.append("--------------------------------------------------------");
 
-        for (int i = 0; i < this.inningsList.size(); i++) {
+        for (Innings innings : this.inningsList) {
             str.append(System.getProperty("line.separator"));
-            str.append(this.inningsList.get(i).getTeam() + " ");
-            if (this.inningsList.get(i).getFirstInningsFlag()) {
+            str.append(innings.getTeam() + " ");
+            if (innings.getFirstInningsFlag()) {
                 str.append("1st Innings: ");
             } else {
                 str.append("2nd Innings: ");
             }
-            str.append(this.inningsList.get(i).getInningsScore());
+            str.append(innings.getInningsScore());
             str.append(System.getProperty("line.separator"));
             str.append("----- Batter Scorecard -----");
             str.append(System.getProperty("line.separator"));
             // Add the batter scorecard
-            for (BatterScore batterScore : this.inningsList.get(i).getInningsBattersList()) {
+            for (BatterScore batterScore : innings.getInningsBattersList()) {
                 str.append(batterScore.getInfo());
                 str.append(System.getProperty("line.separator"));
             }
@@ -119,7 +115,7 @@ public class Match {
             str.append("----- Bowler Scorecard -----");
             str.append(System.getProperty("line.separator"));
             // Add the bowler scorecard
-            for (BowlerScore bowlerScore : this.inningsList.get(i).getInningsBowlersList()) {
+            for (BowlerScore bowlerScore : innings.getInningsBowlersList()) {
                 str.append(bowlerScore.getInfo());
                 str.append(System.getProperty("line.separator"));
             }
