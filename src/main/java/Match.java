@@ -4,7 +4,6 @@ import org.json.simple.JSONObject;
 import java.util.ArrayList;
 
 public class Match {
-    private final JSONObject matchData;
     private final String teamA;
     private final String teamB;
     private final String venue;
@@ -15,86 +14,77 @@ public class Match {
     private final String tossDecision;
     private final ArrayList<Innings> inningsList;
 
-    public Match(JSONObject matchData){
-        this.matchData = matchData;
-
+    public static Match parseFromJson(JSONObject matchData) {
         JSONObject matchInfo = (JSONObject) matchData.get("info");
 
-        this.matchNumber = Integer.parseInt(matchInfo.get("match_type_number").toString());
-        this.venue = matchInfo.get("venue").toString();
+        int matchNumber = Integer.parseInt(matchInfo.get("match_type_number").toString());
+        String venue = matchInfo.get("venue").toString();
         JSONArray teamsObject = (JSONArray) matchInfo.get("teams");
-        this.teamA = teamsObject.get(0).toString();
-        this.teamB = teamsObject.get(1).toString();
+        String teamA = teamsObject.get(0).toString();
+        String teamB = teamsObject.get(1).toString();
+
         JSONObject outcomeObject = (JSONObject) matchInfo.get("outcome");
-        if(outcomeObject.get("result") != null){
-            this.matchWinner = outcomeObject.get("result").toString();
-            this.matchOutcomeDetails = "Draw";
-        } else{
-            this.matchWinner = outcomeObject.get("winner").toString();
+        String matchOutcomeDetails = "";
+        String matchWinner = "";
+        if (outcomeObject.get("result") != null) {
+            matchWinner = outcomeObject.get("result").toString();
+            matchOutcomeDetails = "Draw";
+        } else {
+            matchWinner = outcomeObject.get("winner").toString();
             JSONObject outcomeDetailsObject = (JSONObject) outcomeObject.get("by");
             // desired format = "100 runs" / "8 wickets"
-            StringBuilder matchOutcomeStr = new StringBuilder();
+            ArrayList<String> allDetails = new ArrayList<>();
             for (int i = 0; i < outcomeDetailsObject.keySet().size(); i++) {
-                if(i > 0){
-                    matchOutcomeStr.append(" and ");
-                }
-                matchOutcomeStr.append(outcomeDetailsObject.get(outcomeDetailsObject.keySet().toArray()[i].toString()) + " ");
-                matchOutcomeStr.append(outcomeDetailsObject.keySet().toArray()[i].toString());
+                String currentDetail = outcomeDetailsObject.get(outcomeDetailsObject.keySet().toArray()[i].toString()) +
+                        " " + outcomeDetailsObject.keySet().toArray()[i].toString();
+                allDetails.add(currentDetail);
             }
-            this.matchOutcomeDetails = matchOutcomeStr.toString();
-//                    outcomeDetailsObject.get(outcomeDetailsObject.keySet().toArray()[0].toString()) + " " +
-//                    outcomeDetailsObject.keySet().toArray()[0].toString();
+
+            matchOutcomeDetails = String.join(" and ", allDetails);
         }
+
         JSONObject tossObject = (JSONObject) matchInfo.get("toss");
-        this.tossDecision = tossObject.get("decision").toString();
-        this.tossWinner = tossObject.get("winner").toString();
-        inningsList = new ArrayList<Innings>();
-    }
+        String tossDecision = tossObject.get("decision").toString();
+        String tossWinner = tossObject.get("winner").toString();
 
-    public void parseMatch(){
-        // Read JSON
-
+        ArrayList<Innings> inningsList = new ArrayList<>();
         JSONArray allInnings = (JSONArray) matchData.get("innings");
-
         int teamACount = 0;
         int teamBCount = 0;
-
-        ArrayList<Innings> inningsList = new ArrayList<Innings>();
-        for (int i = 0; i < allInnings.size(); i++) {
-            JSONObject inningsObject = (JSONObject) allInnings.get(i);
+        for (Object allInning : allInnings) {
+            JSONObject inningsObject = (JSONObject) allInning;
             String team = inningsObject.get("team").toString();
 
             boolean firstInningsFlag = false;
-            if(team.equals(this.teamA)){
-                teamACount +=1;
+            if (team.equals(teamA)) {
+                teamACount += 1;
                 firstInningsFlag = teamACount < 2;
-            }else{
-                teamBCount +=1;
+            } else {
+                teamBCount += 1;
                 firstInningsFlag = teamBCount < 2;
             }
 
 
-            boolean declaredFlag = false;
-            if (inningsObject.get("declared") != null) {
-                declaredFlag = true;
-            }
+            boolean declaredFlag = inningsObject.get("declared") != null;
             Innings currentInnings = new Innings(inningsObject, team, declaredFlag, firstInningsFlag);
             currentInnings.parseInnings();
             currentInnings.generateBatterStats();
             currentInnings.generateBowlerStats();
-            this.inningsList.add(currentInnings);
+            inningsList.add(currentInnings);
         }
+
+        return new Match(teamA, teamB, venue, matchNumber, matchWinner, matchOutcomeDetails, tossWinner, tossDecision, inningsList);
     }
 
-    public String printMatch(){
+    public String printMatch() {
 
         StringBuilder str = new StringBuilder();
         str.append("Match #" + String.valueOf(this.matchNumber) + ": ");
         str.append(teamA + " vs. " + teamB + ", at " + venue);
         str.append(System.getProperty("line.separator"));
-        if(this.matchOutcomeDetails.equals("Draw")){
+        if (this.matchOutcomeDetails.equals("Draw")) {
             str.append("Match drawn");
-        }else{
+        } else {
             str.append(this.matchWinner + " won by " + this.matchOutcomeDetails);
         }
         str.append(System.getProperty("line.separator"));
@@ -104,20 +94,20 @@ public class Match {
         str.append(System.getProperty("line.separator"));
         str.append("--------------------------------------------------------");
 
-        for (int i = 0; i < this.inningsList.size(); i++) {
+        for (Innings innings : this.inningsList) {
             str.append(System.getProperty("line.separator"));
-            str.append(this.inningsList.get(i).getTeam() + " ");
-            if(this.inningsList.get(i).getFirstInningsFlag()){
+            str.append(innings.getTeam() + " ");
+            if (innings.getFirstInningsFlag()) {
                 str.append("1st Innings: ");
-            } else{
+            } else {
                 str.append("2nd Innings: ");
             }
-            str.append(this.inningsList.get(i).getInningsScore());
+            str.append(innings.getInningsScore());
             str.append(System.getProperty("line.separator"));
             str.append("----- Batter Scorecard -----");
             str.append(System.getProperty("line.separator"));
             // Add the batter scorecard
-            for (BatterScore batterScore : this.inningsList.get(i).getInningsBattersList()){
+            for (BatterScore batterScore : innings.getInningsBattersList()) {
                 str.append(batterScore.getInfo());
                 str.append(System.getProperty("line.separator"));
             }
@@ -125,7 +115,7 @@ public class Match {
             str.append("----- Bowler Scorecard -----");
             str.append(System.getProperty("line.separator"));
             // Add the bowler scorecard
-            for (BowlerScore bowlerScore : this.inningsList.get(i).getInningsBowlersList()){
+            for (BowlerScore bowlerScore : innings.getInningsBowlersList()) {
                 str.append(bowlerScore.getInfo());
                 str.append(System.getProperty("line.separator"));
             }
@@ -133,10 +123,25 @@ public class Match {
             str.append("--------------------------------------------------------");
         }
         return str.toString();
-
     }
 
-    public ArrayList<Innings> getInningsList() {
-        return inningsList;
+    Match(String teamA,
+          String teamB,
+          String venue,
+          int matchNumber,
+          String matchWinner,
+          String matchOutcomeDetails,
+          String tossWinner,
+          String tossDecision,
+          ArrayList<Innings> inningsList) {
+        this.teamA = teamA;
+        this.teamB = teamB;
+        this.venue = venue;
+        this.matchNumber = matchNumber;
+        this.matchWinner = matchWinner;
+        this.matchOutcomeDetails = matchOutcomeDetails;
+        this.tossWinner = tossWinner;
+        this.tossDecision = tossDecision;
+        this.inningsList = inningsList;
     }
 }
