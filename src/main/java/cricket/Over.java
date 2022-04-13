@@ -1,3 +1,5 @@
+package cricket;
+
 import java.util.ArrayList;
 
 public class Over {
@@ -51,7 +53,7 @@ public class Over {
 
     // Print statement
     public String getInfo(){
-        return "Over: " + id + "; Bowled by: " + bowler + "; Runs: " + runs + "; BatterRuns: " + batterRuns
+        return "CricketJSON.Over: " + id + "; Bowled by: " + bowler + "; Runs: " + runs + "; BatterRuns: " + batterRuns
                 + "; Extras: " + extras + "; Wickets: " + wickets;
     }
     public String showDeliveries(){

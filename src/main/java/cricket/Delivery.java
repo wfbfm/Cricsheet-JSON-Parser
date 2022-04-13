@@ -1,3 +1,5 @@
+package cricket;
+
 public class Delivery extends Over {
 
     protected String batter = "battername";
@@ -12,7 +14,7 @@ public class Delivery extends Over {
         super(val);
     }
 
-//    public Delivery(int val){
+//    public CricketJSON.Delivery(int val){
 //        id = val;
 //    }
 

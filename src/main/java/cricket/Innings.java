@@ -1,3 +1,5 @@
+package cricket;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -129,7 +131,7 @@ public class Innings {
 
 
     public Over parseOver(JSONObject inputOver){
-        // Initialise new Over object
+        // Initialise new CricketJSON.Over object
         Over currentOver = new Over(Integer.parseInt(inputOver.get("over").toString()));
 
         // Loop over deliveries in the over
@@ -138,7 +140,7 @@ public class Innings {
             JSONObject delivery = (JSONObject) deliveries.get(j);
             Delivery parsedDelivery = parseDelivery(delivery);
 
-            // Add delivery to Innings / Over lists
+            // Add delivery to CricketJSON.Innings / CricketJSON.Over lists
             deliveryList.add(parsedDelivery);
             currentOver.addDelivery(parsedDelivery);
         }
@@ -161,7 +163,7 @@ public class Innings {
 
     public void parseInnings(){
 
-        // Loop through overs in Innings and parse
+        // Loop through overs in CricketJSON.Innings and parse
         JSONArray overs = (JSONArray) inningsObject.get("overs");
 
         for (int i = 0; i < overs.size(); i++) {
@@ -173,120 +175,6 @@ public class Innings {
         // Update the score
         updateScore(declared);
     }
-
-//    public void ParseInnings(){
-//        int deliveryCounter = 0;
-//        JSONArray overs = (JSONArray) inningsObject.get("overs");
-//        for (int i = 0; i < overs.size(); i++) {
-//            JSONObject over = (JSONObject) overs.get(i);
-//
-//            Over currentOver = new Over(Integer.parseInt(over.get("over").toString()));
-//            int overRuns = 0;
-//            int overBatterRuns = 0;
-//            int overExtras = 0;
-//            int overWickets = 0;
-//            int overWides = 0;
-//            int overNoBalls = 0;
-//            int overByes = 0;
-//            int overLegByes = 0;
-//
-//            String overBowler = "overBowler";
-//
-//            JSONArray deliveries = (JSONArray) over.get("deliveries");
-//            for (int j = 0; j < deliveries.size(); j++) {
-//                JSONObject delivery = (JSONObject) deliveries.get(j);
-//
-//                JSONObject runs = (JSONObject) delivery.get("runs");
-//
-//
-//                // Initiate a new delivery and set the basic parameters
-//                Delivery currentDelivery = new Delivery(deliveryCounter);
-//
-//                currentDelivery.setRuns(Integer.parseInt(runs.get("total").toString()));
-//                currentDelivery.setBatterRuns(Integer.parseInt(runs.get("batter").toString()));
-//                currentDelivery.setExtras(Integer.parseInt(runs.get("extras").toString()));
-//                currentDelivery.setBatter(delivery.get("batter").toString());
-//                currentDelivery.setBowler(delivery.get("bowler").toString());
-//                currentDelivery.setNonStriker(delivery.get("non_striker").toString());
-//
-//                // Parse the wickets
-//                JSONArray wickets = (JSONArray) delivery.get("wickets");
-//                if (wickets != null){
-//                    currentDelivery.setWickets(1);
-//                    JSONObject wicketsObject = (JSONObject)  wickets.get(0);
-//                    currentDelivery.setHowOut(wicketsObject.get("kind").toString());
-//                    currentDelivery.setWhoOut(wicketsObject.get("player_out").toString());
-//
-//                    // Parse the fielder
-//                    JSONArray fielders = (JSONArray) wicketsObject.get("fielders");
-//                    if (fielders != null){
-//                        JSONObject fieldersObject = (JSONObject) fielders.get(0);
-//                        currentDelivery.setFielder(fieldersObject.get("name").toString());
-//                    }
-//
-//                }
-//
-//
-//
-//
-//                // Parse the extras
-//                JSONObject extras = (JSONObject) delivery.get("extras");
-//                if (extras != null){
-//                    if(extras.get("wides") != null){
-//                        currentDelivery.setWides(Integer.parseInt(extras.get("wides").toString()));
-//                    }
-//                    if(extras.get("legbyes") != null){
-//                        currentDelivery.setLegByes(Integer.parseInt(extras.get("legbyes").toString()));
-//                    }
-//                    if(extras.get("byes") != null){
-//                        currentDelivery.setByes(Integer.parseInt(extras.get("byes").toString()));
-//                    }
-//                    if(extras.get("noballs") != null){
-//                        currentDelivery.setNoBalls(Integer.parseInt(extras.get("noballs").toString()));
-//                    }
-//                }
-//                // Calculate delivery parameters
-//                currentDelivery.calculateDot();
-//                currentDelivery.setBallNotation();
-//                deliveryCounter += 1;
-//                deliveryList.add(currentDelivery);
-//                currentOver.addDelivery(currentDelivery);
-//
-//                // Update the score
-//                inningsRuns += currentDelivery.runs;
-//                inningsWickets += currentDelivery.wickets;
-//                updateScore(i==overs.size()-1 & j==deliveries.size()-1 & declared);
-//                //System.out.println(inningsScore);
-//
-//                // Aggregate the over params
-//                overRuns += currentDelivery.runs;
-//                overBatterRuns += currentDelivery.batterRuns;
-//                overExtras += currentDelivery.extras;
-//                overWickets += currentDelivery.wickets;
-//                overBowler = currentDelivery.bowler;
-//                overWides += currentDelivery.wides;
-//                overLegByes += currentDelivery.legByes;
-//                overByes += currentDelivery.byes;
-//                overNoBalls += currentDelivery.noBalls;
-//            }
-//
-//            // Set over parameters with aggregated values
-//
-//            currentOver.setRuns(overRuns);
-//            currentOver.setBatterRuns(overBatterRuns);
-//            currentOver.setExtras(overExtras);
-//            currentOver.setWickets(overWickets);
-//            currentOver.setBowler(overBowler);
-//            currentOver.setWides(overWides);
-//            currentOver.setLegByes(overLegByes);
-//            currentOver.setByes(overByes);
-//            currentOver.setNoBalls(overNoBalls);
-//            currentOver.calculateMaiden();
-//
-//            overList.add(currentOver);
-//        }
-//    }
-
 
 
     public void generateBatterStats(){
@@ -324,7 +212,7 @@ public class Innings {
                 return o1.getBattingPosition() < o2.getBattingPosition() ? -1 : 1;
             }
         });
-//        for (BatterScore batterScore : inningsBattersList){
+//        for (CricketJSON.BatterScore batterScore : inningsBattersList){
 //            System.out.println(batterScore.getInfo());
 //        }
     }
@@ -356,7 +244,7 @@ public class Innings {
                 return o1.getBowlingPosition() < o2.getBowlingPosition() ? -1 : 1;
             }
         });
-//        for (BowlerScore bowlerScore : inningsBowlersList){
+//        for (CricketJSON.BowlerScore bowlerScore : inningsBowlersList){
 //            System.out.println(bowlerScore.getInfo());
 //        }
     }
