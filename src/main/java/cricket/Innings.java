@@ -24,7 +24,7 @@ public class Innings {
 
     private int deliveryCounter = 0;
 
-    public Innings(JSONObject inputInningsObject, String inputTeam, boolean declaredFlag, boolean inningsFlag){
+    public Innings(JSONObject inputInningsObject, String inputTeam, boolean declaredFlag, boolean inningsFlag) {
         inningsObject = inputInningsObject;
         team = inputTeam;
         declared = declaredFlag;
@@ -42,12 +42,15 @@ public class Innings {
     public ArrayList<Over> getOverList() {
         return overList;
     }
-    public String getTeam(){
+
+    public String getTeam() {
         return team;
     }
-    public boolean getFirstInningsFlag(){
+
+    public boolean getFirstInningsFlag() {
         return firstInnings;
     }
+
     public String getInningsScore() {
         return inningsScore;
     }
@@ -60,17 +63,16 @@ public class Innings {
         return inningsBowlersList;
     }
 
-    public void updateScore(boolean declaredDisplay){
-        if(declaredDisplay){
-            inningsScore = String.valueOf(inningsRuns) + " - " + String.valueOf(inningsWickets) +"d";
-        }
-        else{
+    public void updateScore(boolean declaredDisplay) {
+        if (declaredDisplay) {
+            inningsScore = String.valueOf(inningsRuns) + " - " + String.valueOf(inningsWickets) + "d";
+        } else {
             inningsScore = String.valueOf(inningsRuns) + " - " + String.valueOf(inningsWickets);
         }
 
     }
 
-    public Delivery parseDelivery(JSONObject delivery){
+    public Delivery parseDelivery(JSONObject delivery) {
         // Initiate a new delivery object
         Delivery currentDelivery = new Delivery(deliveryCounter);
 
@@ -86,15 +88,15 @@ public class Innings {
 
         // Parse the wickets & set if they exist
         JSONArray wickets = (JSONArray) delivery.get("wickets");
-        if (wickets != null){
+        if (wickets != null) {
             currentDelivery.setWickets(1);
-            JSONObject wicketsObject = (JSONObject)  wickets.get(0);
+            JSONObject wicketsObject = (JSONObject) wickets.get(0);
             currentDelivery.setHowOut(wicketsObject.get("kind").toString());
             currentDelivery.setWhoOut(wicketsObject.get("player_out").toString());
 
             // Parse the fielder
             JSONArray fielders = (JSONArray) wicketsObject.get("fielders");
-            if (fielders != null){
+            if (fielders != null) {
                 JSONObject fieldersObject = (JSONObject) fielders.get(0);
                 currentDelivery.setFielder(fieldersObject.get("name").toString());
             }
@@ -103,17 +105,17 @@ public class Innings {
 
         // Parse the extras & set if they exist
         JSONObject extras = (JSONObject) delivery.get("extras");
-        if (extras != null){
-            if(extras.get("wides") != null){
+        if (extras != null) {
+            if (extras.get("wides") != null) {
                 currentDelivery.setWides(Integer.parseInt(extras.get("wides").toString()));
             }
-            if(extras.get("legbyes") != null){
+            if (extras.get("legbyes") != null) {
                 currentDelivery.setLegByes(Integer.parseInt(extras.get("legbyes").toString()));
             }
-            if(extras.get("byes") != null){
+            if (extras.get("byes") != null) {
                 currentDelivery.setByes(Integer.parseInt(extras.get("byes").toString()));
             }
-            if(extras.get("noballs") != null){
+            if (extras.get("noballs") != null) {
                 currentDelivery.setNoBalls(Integer.parseInt(extras.get("noballs").toString()));
             }
         }
@@ -130,7 +132,7 @@ public class Innings {
     }
 
 
-    public Over parseOver(JSONObject inputOver){
+    public Over parseOver(JSONObject inputOver) {
         // Initialise new CricketJSON.Over object
         Over currentOver = new Over(Integer.parseInt(inputOver.get("over").toString()));
 
@@ -156,12 +158,14 @@ public class Innings {
         currentOver.setByes(currentOver.getOverDeliveries().stream().mapToInt(o -> o.byes).sum());
         currentOver.setNoBalls(currentOver.getOverDeliveries().stream().mapToInt(o -> o.noBalls).sum());
 
+        currentOver.calculateMaiden();
+
         return currentOver;
 
 
     }
 
-    public void parseInnings(){
+    public void parseInnings() {
 
         // Loop through overs in CricketJSON.Innings and parse
         JSONArray overs = (JSONArray) inningsObject.get("overs");
@@ -177,20 +181,20 @@ public class Innings {
     }
 
 
-    public void generateBatterStats(){
+    public void generateBatterStats() {
         int batterPosition = 1;
         HashMap<String, BatterScore> inningsBatterScores = new HashMap<String, BatterScore>();
         for (int i = 0; i < getDeliveryList().size(); i++) {
             Delivery currentDelivery = getDeliveryList().get(i);
             // Check if current batter has been initiated
-            if (!inningsBatterScores.containsKey(currentDelivery.batter)){
+            if (!inningsBatterScores.containsKey(currentDelivery.batter)) {
                 // Initiate a new batterScore
                 BatterScore newBatterScore = new BatterScore(currentDelivery.batter, batterPosition);
                 batterPosition += 1;
                 inningsBatterScores.put(currentDelivery.batter, newBatterScore);
             }
             // Check if current nonstriker has been initiated
-            if (!inningsBatterScores.containsKey(currentDelivery.nonStriker)){
+            if (!inningsBatterScores.containsKey(currentDelivery.nonStriker)) {
                 // Initiate a new batterScore
                 BatterScore newBatterScore = new BatterScore(currentDelivery.nonStriker, batterPosition);
                 batterPosition += 1;
@@ -200,30 +204,34 @@ public class Innings {
             BatterScore revisedBatterScore = inningsBatterScores.get(currentDelivery.batter);
             revisedBatterScore.updateBatterScore(currentDelivery);
             inningsBatterScores.put(currentDelivery.batter, revisedBatterScore);
+
+            // If non-striker is out, update their score
+            if (currentDelivery.whoOut.equals(currentDelivery.nonStriker)) {
+                BatterScore revisedNonStrikerScore = inningsBatterScores.get(currentDelivery.nonStriker);
+                revisedNonStrikerScore.updateBatterScore(currentDelivery);
+                inningsBatterScores.put(currentDelivery.nonStriker, revisedNonStrikerScore);
+            }
         }
 
-        for (String player : inningsBatterScores.keySet()){
+        for (String player : inningsBatterScores.keySet()) {
             inningsBattersList.add(inningsBatterScores.get(player));
         }
         Collections.sort(inningsBattersList, new Comparator<BatterScore>() {
             public int compare(BatterScore o1, BatterScore o2) {
-                if(o1.getBattingPosition() == o2.getBattingPosition())
+                if (o1.getBattingPosition() == o2.getBattingPosition())
                     return 0;
                 return o1.getBattingPosition() < o2.getBattingPosition() ? -1 : 1;
             }
         });
-//        for (CricketJSON.BatterScore batterScore : inningsBattersList){
-//            System.out.println(batterScore.getInfo());
-//        }
     }
 
-    public void generateBowlerStats(){
+    public void generateBowlerStats() {
         int bowlerPosition = 1;
         HashMap<String, BowlerScore> inningsBowlerScores = new HashMap<String, BowlerScore>();
         for (int i = 0; i < getOverList().size(); i++) {
             Over currentOver = getOverList().get(i);
             // Check if current bowler has been initiated
-            if (!inningsBowlerScores.containsKey(currentOver.bowler)){
+            if (!inningsBowlerScores.containsKey(currentOver.bowler)) {
                 // Initiate a new bowlerScore
                 BowlerScore newBowlerScore = new BowlerScore(currentOver.bowler, bowlerPosition);
                 bowlerPosition += 1;
@@ -234,19 +242,16 @@ public class Innings {
             revisedBowlerScore.updateBowlerScore(currentOver);
             inningsBowlerScores.put(currentOver.bowler, revisedBowlerScore);
         }
-        for (String player : inningsBowlerScores.keySet()){
+        for (String player : inningsBowlerScores.keySet()) {
             inningsBowlersList.add(inningsBowlerScores.get(player));
         }
         Collections.sort(inningsBowlersList, new Comparator<BowlerScore>() {
             public int compare(BowlerScore o1, BowlerScore o2) {
-                if(o1.getBowlingPosition() == o2.getBowlingPosition())
+                if (o1.getBowlingPosition() == o2.getBowlingPosition())
                     return 0;
                 return o1.getBowlingPosition() < o2.getBowlingPosition() ? -1 : 1;
             }
         });
-//        for (CricketJSON.BowlerScore bowlerScore : inningsBowlersList){
-//            System.out.println(bowlerScore.getInfo());
-//        }
     }
 
 }

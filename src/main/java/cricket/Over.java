@@ -19,7 +19,7 @@ public class Over {
 
     protected ArrayList<Delivery> overDeliveries;
 
-    public Over(int val){
+    public Over(int val) {
         id = val;
         overDeliveries = new ArrayList<Delivery>();
     }
@@ -30,36 +30,74 @@ public class Over {
     }
 
     // Setters
-    public void setRuns(int val){runs = val;}
-    public void setBatterRuns(int val){batterRuns = val;}
-    public void setExtras(int val){extras = val;}
-    public void setWickets(int val){wickets = val;}
-    public void setBowler(String val){bowler = val;}
-    public void setWides(int val){wides = val;}
-    public void setNoBalls(int val){noBalls = val;}
-    public void setByes(int val){byes = val;}
-    public void setLegByes(int val){legByes = val;}
-    public void addDelivery(Delivery delivery){
+    public void setRuns(int val) {
+        runs = val;
+    }
+
+    public void setBatterRuns(int val) {
+        batterRuns = val;
+    }
+
+    public void setExtras(int val) {
+        extras = val;
+    }
+
+    public void setWickets(int val) {
+        wickets = val;
+    }
+
+    public void setBowler(String val) {
+        bowler = val;
+    }
+
+    public void setWides(int val) {
+        wides = val;
+    }
+
+    public void setNoBalls(int val) {
+        noBalls = val;
+    }
+
+    public void setByes(int val) {
+        byes = val;
+    }
+
+    public void setLegByes(int val) {
+        legByes = val;
+    }
+
+    public void addDelivery(Delivery delivery) {
         overDeliveries.add(delivery);
     }
-    public void calculateMaiden(){
-        if(batterRuns == 0 & wides == 0 & noBalls == 0){
-            this.isMaiden = true;
-        }
-        else{
+
+    public void calculateMaiden() {
+        if (batterRuns == 0 && wides == 0 && noBalls == 0) {
+            int legalDeliveryCount = 0;
+            for (Delivery delivery : this.overDeliveries) {
+                if (delivery.wides == 0 && delivery.noBalls == 0) {
+                    legalDeliveryCount += 1;
+                }
+            }
+            if (legalDeliveryCount == 6) {
+                this.isMaiden = true;
+            } else {
+                this.isMaiden = false;
+            }
+        } else {
             this.isMaiden = false;
         }
     }
 
     // Print statement
-    public String getInfo(){
+    public String getInfo() {
         return "CricketJSON.Over: " + id + "; Bowled by: " + bowler + "; Runs: " + runs + "; BatterRuns: " + batterRuns
                 + "; Extras: " + extras + "; Wickets: " + wickets;
     }
-    public String showDeliveries(){
+
+    public String showDeliveries() {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < this.overDeliveries.size(); i++) {
-            if(!str.isEmpty()){
+            if (!str.isEmpty()) {
                 str.append(" ");
             }
             str.append(this.overDeliveries.get(i).ballNotation);
